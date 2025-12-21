@@ -1,0 +1,87 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bizning Kompaniya{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="{% url 'home' %}" class="logo">
+                    <span class="logo-icon">🏢</span>
+                    <span class="logo-text">Bizning Kompaniya</span>
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="{% url 'home' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Bosh
+                            sahifa</a></li>
+                    <li><a href="{% url 'about' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">Biz
+                            haqimizda</a></li>
+                    <li><a href="{% url 'contact' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Bog'lanish</a>
+                    </li>
+                    <li><a href="{% url 'sotuv_list' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'sotuv_list' or request.resolver_match.url_name == 'sotuv_detail' %}active{% endif %}">Sotuvlar</a>
+                    </li>
+                    <li><a href="/admin/" class="nav-link admin-link">Admin</a></li>
+                </ul>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Bizning Kompaniya</h3>
+                    <p>Biz sizga eng yaxshi xizmatlarni taqdim etamiz</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Tezkor Linklar</h3>
+                    <ul>
+                        <li><a href="{% url 'home' %}">Bosh sahifa</a></li>
+                        <li><a href="{% url 'about' %}">Biz haqimizda</a></li>
+                        <li><a href="{% url 'contact' %}">Bog'lanish</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Ijtimoiy Tarmoqlar</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link">📘</a>
+                        <a href="#" class="social-link">📷</a>
+                        <a href="#" class="social-link">🐦</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Bizning Kompaniya. Barcha huquqlar himoyalangan.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

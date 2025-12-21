@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bosh sahifa - Bizning Kompaniya{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Xush kelibsiz!</h1>
+            <p class="hero-subtitle">Bizning kompaniyaga xush kelibsiz. Biz sizga eng yaxshi mahsulotlar va xizmatlarni taqdim etamiz.</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-number">{{ mahsulotlar_soni }}</div>
+                    <div class="stat-label">Mahsulotlar</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ hodimlar_soni }}</div>
+                    <div class="stat-label">Hodimlar</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Products Section -->
+<section class="section products-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Mahsulotlarimiz</h2>
+            <p class="section-subtitle">Bizning eng mashhur mahsulotlarimiz</p>
+        </div>
+        {% if mahsulotlar %}
+        <div class="products-grid">
+            {% for mahsulot in mahsulotlar %}
+            <div class="product-card">
+                <div class="product-badge">{{ mahsulot.get_turi_display }}</div>
+                <div class="product-info">
+                    <h3 class="product-name">{{ mahsulot.nomi }}</h3>
+                    {% if mahsulot.tavsif %}
+                    <p class="product-description">{{ mahsulot.tavsif|truncatewords:15 }}</p>
+                    {% endif %}
+                    <div class="product-details">
+                        <div class="product-price">{{ mahsulot.narx }} so'm</div>
+                        <div class="product-stock {% if mahsulot.miqdor > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                            {% if mahsulot.miqdor > 0 %}
+                                📦 {{ mahsulot.miqdor }} dona
+                            {% else %}
+                                ❌ Mavjud emas
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>Hozircha mahsulotlar mavjud emas</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Employees Section -->
+<section class="section employees-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Bizning Jamoa</h2>
+            <p class="section-subtitle">Bizning professional hodimlarimiz</p>
+        </div>
+        {% if hodimlar %}
+        <div class="employees-grid">
+            {% for hodim in hodimlar %}
+            <div class="employee-card">
+                <div class="employee-avatar">
+                    <span class="avatar-text">{{ hodim.ism|first }}{{ hodim.familiya|first }}</span>
+                </div>
+                <div class="employee-info">
+                    <h3 class="employee-name">{{ hodim.ism }} {{ hodim.familiya }}</h3>
+                    <div class="employee-salary">{{ hodim.maosh }} so'm</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>Hozircha hodimlar mavjud emas</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

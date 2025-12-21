@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ sotuv.mahsulot.nomi }} - Sotuv tafsilotlari{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="detail-wrapper">
+        <a href="{% url 'sotuv_list' %}" class="back-link">← Sotuvlar ro'yxatiga qaytish</a>
+        
+        <div class="detail-header">
+            <h1>🧾 Sotuv #{{ sotuv.id }}</h1>
+            <span class="status-badge status-{{ sotuv.holati }}">
+                {{ sotuv.get_holati_display }}
+            </span>
+        </div>
+
+        <div class="detail-grid">
+            <!-- Mahsulot ma'lumotlari -->
+            <div class="detail-card">
+                <h3>📦 Mahsulot ma'lumotlari</h3>
+                <div class="info-row">
+                    <span class="label">Mahsulot:</span>
+                    <span class="value">{{ sotuv.mahsulot.nomi }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Mahsulot turi:</span>
+                    <span class="value">{{ sotuv.mahsulot.get_turi_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Sotilgan miqdor:</span>
+                    <span class="value">{{ sotuv.miqdor }} dona</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Birlik narxi:</span>
+                    <span class="value">{{ sotuv.narx|floatformat:0 }} so'm</span>
+                </div>
+                <div class="info-row total">
+                    <span class="label">Jami summa:</span>
+                    <span class="value">{{ sotuv.jami_summa|floatformat:0 }} so'm</span>
+                </div>
+            </div>
+
+            <!-- Sotuvchi ma'lumotlari -->
+            <div class="detail-card">
+                <h3>👤 Sotuvchi</h3>
+                <div class="info-row">
+                    <span class="label">Ism familiya:</span>
+                    <span class="value">{{ sotuv.sotuvchi.ism }} {{ sotuv.sotuvchi.familiya }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Telefon:</span>
+                    <span class="value">{{ sotuv.sotuvchi.telefon }}</span>
+                </div>
+            </div>
+
+            <!-- Mijoz ma'lumotlari -->
+            <div class="detail-card">
+                <h3>🛒 Mijoz ma'lumotlari</h3>
+                <div class="info-row">
+                    <span class="label">Mijoz ismi:</span>
+                    <span class="value">{{ sotuv.mijoz_ismi }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Telefon:</span>
+                    <span class="value">{{ sotuv.mijoz_telefon }}</span>
+                </div>
+            </div>
+
+            <!-- Qo'shimcha ma'lumotlar -->
+            <div class="detail-card">
+                <h3>📋 Qo'shimcha</h3>
+                <div class="info-row">
+                    <span class="label">Yaratilgan:</span>
+                    <span class="value">{{ sotuv.yaratilgan_vaqt|date:"d.m.Y H:i" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Yangilangan:</span>
+                    <span class="value">{{ sotuv.yangilangan_vaqt|date:"d.m.Y H:i" }}</span>
+                </div>
+                {% if sotuv.izoh %}
+                <div class="info-row">
+                    <span class="label">Izoh:</span>
+                    <span class="value">{{ sotuv.izoh }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: #764ba2;
+    }
+
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .detail-header h1 {
+        font-size: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .detail-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .detail-card h3 {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+        color: #333;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-row .label {
+        color: #888;
+        font-size: 0.95rem;
+    }
+
+    .info-row .value {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .info-row.total {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        margin: 0.5rem -1.5rem;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+    }
+
+    .info-row.total .value {
+        font-size: 1.2rem;
+        color: #667eea;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1.2rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-kutilmoqda {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-tasdiqlangan {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-yetkazilgan {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-bekor_qilingan {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    @media (max-width: 768px) {
+        .detail-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Sotuvlar - Bizning Kompaniya{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="page-header">
+        <h1>📊 Sotuvlar</h1>
+        <p>Barcha sotuvlar ro'yxati va statistikasi</p>
+    </section>
+
+    <!-- Statistika kartochkalari -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-info">
+                <span class="stat-value">{{ jami_sotuvlar }}</span>
+                <span class="stat-label">Jami sotuvlar</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+                <span class="stat-value">{{ jami_summa|floatformat:0 }}</span>
+                <span class="stat-label">Jami summa (so'm)</span>
+            </div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <span class="stat-value">{{ tasdiqlangan_soni }}</span>
+                <span class="stat-label">Tasdiqlangan</span>
+            </div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-icon">🚚</div>
+            <div class="stat-info">
+                <span class="stat-value">{{ yetkazilgan_soni }}</span>
+                <span class="stat-label">Yetkazilgan</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jadval -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Mahsulot</th>
+                    <th>Sotuvchi</th>
+                    <th>Mijoz</th>
+                    <th>Miqdor</th>
+                    <th>Narx</th>
+                    <th>Jami</th>
+                    <th>Holati</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sotuv in sotuvlar %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'sotuv_detail' sotuv.id %}" class="product-link">
+                            {{ sotuv.mahsulot.nomi }}
+                        </a>
+                    </td>
+                    <td>{{ sotuv.sotuvchi.ism }} {{ sotuv.sotuvchi.familiya }}</td>
+                    <td>
+                        <div class="customer-info">
+                            <span class="customer-name">{{ sotuv.mijoz_ismi }}</span>
+                            <span class="customer-phone">{{ sotuv.mijoz_telefon }}</span>
+                        </div>
+                    </td>
+                    <td>{{ sotuv.miqdor }}</td>
+                    <td>{{ sotuv.narx|floatformat:0 }}</td>
+                    <td><strong>{{ sotuv.jami_summa|floatformat:0 }}</strong></td>
+                    <td>
+                        <span class="status-badge status-{{ sotuv.holati }}">
+                            {{ sotuv.get_holati_display }}
+                        </span>
+                    </td>
+                    <td>{{ sotuv.yaratilgan_vaqt|date:"d.m.Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="empty-message">
+                        <div class="empty-state">
+                            <span class="empty-icon">📭</span>
+                            <p>Hozircha sotuvlar mavjud emas</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .page-header {
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+    }
+
+    .stat-card.success .stat-icon {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .stat-card.info .stat-icon {
+        background: linear-gradient(135deg, #3498db 0%, #8e44ad 100%);
+    }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .stat-label {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .data-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .data-table tbody tr:hover {
+        background: #f8f9ff;
+    }
+
+    .product-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .product-link:hover {
+        text-decoration: underline;
+    }
+
+    .customer-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .customer-name {
+        font-weight: 500;
+    }
+
+    .customer-phone {
+        font-size: 0.85rem;
+        color: #888;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-kutilmoqda {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-tasdiqlangan {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-yetkazilgan {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-bekor_qilingan {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .empty-message {
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .data-table {
+            font-size: 0.85rem;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
