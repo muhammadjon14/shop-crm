@@ -3,21 +3,10 @@ from mahsulotlar.models import Mahsulot
 from hodimlar.models import Hodim
 
 
-class SotuvHolati(models.TextChoices):
-    KUTILMOQDA = 'kutilmoqda', 'Kutilmoqda'
-    TASDIQLANGAN = 'tasdiqlangan', 'Tasdiqlangan'
-    YETKAZILGAN = 'yetkazilgan', 'Yetkazilgan'
-    BEKOR_QILINGAN = 'bekor_qilingan', 'Bekor qilingan'
+
 
 
 class Sotuv(models.Model):
-    mahsulot = models.ForeignKey(
-        Mahsulot,
-        on_delete=models.CASCADE,
-        verbose_name='Mahsulot',
-        related_name='sotuvlar'
-    )
-    
     sotuvchi = models.ForeignKey(
         Hodim,
         on_delete=models.CASCADE,
@@ -25,18 +14,12 @@ class Sotuv(models.Model):
         related_name='sotuvlar'
     )
     
-    mijoz_ismi = models.CharField(max_length=200, verbose_name='Mijoz ismi')
-    mijoz_telefon = models.CharField(max_length=20, verbose_name='Mijoz telefon')
-    miqdor = models.PositiveIntegerField(verbose_name='Sotilgan miqdor', default=1)
-    narx = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Sotuv narxi')
+    mijoz_ismi = models.CharField(max_length=200, verbose_name='Mijoz ismi', blank=True, default="Mijoz")
+    mijoz_telefon = models.CharField(max_length=20, verbose_name='Mijoz telefon', blank=True)
     
-    holati = models.CharField(
-        max_length=50,
-        choices=SotuvHolati.choices,
-        default=SotuvHolati.KUTILMOQDA,
-        verbose_name='Holati'
-    )
+
     
+    jami_summa = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Jami summa', default=0)
     izoh = models.TextField(verbose_name='Izoh', blank=True)
     yaratilgan_vaqt = models.DateTimeField(auto_now_add=True, verbose_name='Yaratilgan vaqt')
     yangilangan_vaqt = models.DateTimeField(auto_now=True, verbose_name='Yangilangan vaqt')
@@ -47,8 +30,48 @@ class Sotuv(models.Model):
         ordering = ['-yaratilgan_vaqt']
 
     def __str__(self):
-        return f"{self.mahsulot.nomi} - {self.mijoz_ismi} ({self.miqdor} dona)"
+        return f"Sotuv #{self.id} - {self.mijoz_ismi} ({self.yaratilgan_vaqt.strftime('%Y-%m-%d %H:%M')})"
+
+    def update_total(self):
+        self.jami_summa = sum(item.jami_summa for item in self.items.all())
+        self.save()
+
+
+class SotuvItem(models.Model):
+    sotuv = models.ForeignKey(
+        Sotuv,
+        on_delete=models.CASCADE,
+        verbose_name='Sotuv',
+        related_name='items'
+    )
+    mahsulot = models.ForeignKey(
+        Mahsulot,
+        on_delete=models.CASCADE,
+        verbose_name='Mahsulot',
+        related_name='sotuv_items'
+    )
+
+    miqdor = models.PositiveIntegerField(verbose_name='Miqdor', default=1)
+    narx = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Sotuv narxi')
+    litre = models.CharField(max_length=20, verbose_name='Litr', blank=True, null=True)
+    
+    class Meta:
+        verbose_name = "Sotuv mahsuloti"
+        verbose_name_plural = "Sotuv mahsulotlari"
+
+    def __str__(self):
+        return f"{self.mahsulot.nomi} x {self.miqdor}"
 
     @property
     def jami_summa(self):
         return self.narx * self.miqdor
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            # Decrease stock
+            # Decrease stock
+            self.mahsulot.miqdor -= self.miqdor
+            self.mahsulot.save()
+        self.sotuv.update_total()

@@ -1,10 +1,11 @@
 from django.db import models
 
 class Hodim(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Foydalanuvchi')
     ism = models.CharField(max_length=100, verbose_name='Ism')
     familiya = models.CharField(max_length=100, verbose_name='Familiya')
     maosh = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Maosh')
-    telefon = models.IntegerField(max_length=20, verbose_name='Telefon')
+    telefon = models.CharField(max_length=20, verbose_name='Telefon')
     yaratilgan_vaqt = models.DateTimeField(auto_now_add=True, verbose_name='Yaratilgan vaqt')
     yangilangan_vaqt = models.DateTimeField(auto_now=True, verbose_name='Yangilangan vaqt')
 

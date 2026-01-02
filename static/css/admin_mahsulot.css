@@ -1,0 +1,28 @@
+/* Styles for segmented control in admin product form */
+.segmented-control {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.segmented-control .segmented-input {
+  display: none;
+}
+
+.segmented-control .segmented-label {
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  background: #fff;
+  color: #111827;
+  font-weight: 600;
+}
+
+.segmented-control .segmented-input:checked+.segmented-label,
+.segmented-control .segmented-label:hover {
+  background: #4f46e5;
+  color: #fff;
+}

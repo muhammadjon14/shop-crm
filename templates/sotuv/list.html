@@ -7,6 +7,12 @@
     <section class="page-header">
         <h1>📊 Sotuvlar</h1>
         <p>Barcha sotuvlar ro'yxati va statistikasi</p>
+        <div style="margin-top: 1rem;">
+            <a href="{% url 'pos' %}" class="btn-primary"
+                style="text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 8px; background: #6366f1; color: white; font-weight: 600;">
+                ➕ Yangi sotuv (Kassa)
+            </a>
+        </div>
     </section>
 
     <!-- Statistika kartochkalari -->
@@ -47,12 +53,11 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Mahsulot</th>
+                    <th>ID</th>
                     <th>Sotuvchi</th>
                     <th>Mijoz</th>
-                    <th>Miqdor</th>
-                    <th>Narx</th>
-                    <th>Jami</th>
+                    <th>Mahsulotlar</th>
+                    <th>Jami Summa</th>
                     <th>Holati</th>
                     <th>Sana</th>
                 </tr>
@@ -63,7 +68,7 @@
                     <td>{{ forloop.counter }}</td>
                     <td>
                         <a href="{% url 'sotuv_detail' sotuv.id %}" class="product-link">
-                            {{ sotuv.mahsulot.nomi }}
+                            #{{ sotuv.id }}
                         </a>
                     </td>
                     <td>{{ sotuv.sotuvchi.ism }} {{ sotuv.sotuvchi.familiya }}</td>
@@ -73,19 +78,25 @@
                             <span class="customer-phone">{{ sotuv.mijoz_telefon }}</span>
                         </div>
                     </td>
-                    <td>{{ sotuv.miqdor }}</td>
-                    <td>{{ sotuv.narx|floatformat:0 }}</td>
-                    <td><strong>{{ sotuv.jami_summa|floatformat:0 }}</strong></td>
+                    <td>
+                        <div style="font-size: 0.85rem; color: #555;">
+                            {% for item in sotuv.items.all %}
+                            {{ item.mahsulot.nomi }}{% if item.mahsulot.litre != 'none' %} ({{ item.mahsulot.litre
+                            }}L){% endif %}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td><strong>{{ sotuv.jami_summa|floatformat:0 }} so'm</strong></td>
                     <td>
                         <span class="status-badge status-{{ sotuv.holati }}">
                             {{ sotuv.get_holati_display }}
                         </span>
                     </td>
-                    <td>{{ sotuv.yaratilgan_vaqt|date:"d.m.Y" }}</td>
+                    <td>{{ sotuv.yaratilgan_vaqt|date:"d.m.Y H:i" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" class="empty-message">
+                    <td colspan="8" class="empty-message">
                         <div class="empty-state">
                             <span class="empty-icon">📭</span>
                             <p>Hozircha sotuvlar mavjud emas</p>
@@ -280,7 +291,7 @@
         .data-table {
             font-size: 0.85rem;
         }
-        
+
         .data-table th,
         .data-table td {
             padding: 0.75rem 0.5rem;

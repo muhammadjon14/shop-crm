@@ -1,0 +1,59 @@
+{% extends "admin/change_form.html" %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const typeMapping = {{ allowed_litres_mapping|default: "{}" | safe
+    }};
+    console.log('Type Mapping:', typeMapping);
+
+    const typeInputs = document.querySelectorAll('input[name="turi"]');
+    const litreInputs = document.querySelectorAll('input[name="litre"]');
+
+    function filterLitres(typeId) {
+        const allowed = typeMapping[typeId];
+        console.log('Filtering for Type ID:', typeId);
+        console.log('Allowed Litres:', allowed);
+
+        litreInputs.forEach(input => {
+            const label = document.querySelector(`label[for="${input.id}"]`);
+            if (!label) return;
+
+            // If no type selected or no restrictions, show all
+            if (!typeId || !allowed || allowed.length === 0) {
+                input.style.display = 'none'; // Keep input hidden (it's segmented)
+                label.style.display = 'inline-block';
+                return;
+            }
+
+            // Check if this litre value is allowed
+            if (allowed.includes(input.value)) {
+                label.style.display = 'inline-block';
+            } else {
+                label.style.display = 'none';
+                // If the hidden option was selected, uncheck it
+                if (input.checked) {
+                    input.checked = false;
+                }
+            }
+        });
+    }
+
+    // Initial check
+    const selectedType = document.querySelector('input[name="turi"]:checked');
+    if (selectedType) {
+        filterLitres(selectedType.value);
+    }
+
+    // Listen for changes
+    typeInputs.forEach(input => {
+        input.addEventListener('change', function () {
+            if (this.checked) {
+                filterLitres(this.value);
+            }
+        });
+    });
+    });
+</script>
+{% endblock %}

@@ -3,7 +3,7 @@ from .models import Hodim
 
 @admin.register(Hodim)
 class HodimAdmin(admin.ModelAdmin):
-    list_display = ['ism', 'familiya', 'maosh', 'telefon']
+    list_display = ['ism', 'familiya', 'maosh', 'telefon', 'user']
     list_filter = ['maosh']
     search_fields = ['ism', 'familiya']
     list_per_page = 20

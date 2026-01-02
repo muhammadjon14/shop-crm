@@ -58,4 +58,5 @@ urlpatterns = [
     path('', include("main.urls")),
     path('hodimlar/', include('hodimlar.urls')),
     path('sotuv/', include('sotuv.urls')),
+    path('mahsulotlar/', include('mahsulotlar.urls')),
 ]

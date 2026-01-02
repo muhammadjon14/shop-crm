@@ -9,7 +9,8 @@
     <div class="container">
         <div class="hero-content">
             <h1 class="hero-title">Xush kelibsiz!</h1>
-            <p class="hero-subtitle">Bizning kompaniyaga xush kelibsiz. Biz sizga eng yaxshi mahsulotlar va xizmatlarni taqdim etamiz.</p>
+            <p class="hero-subtitle">Bizning kompaniyaga xush kelibsiz. Biz sizga eng yaxshi mahsulotlar va xizmatlarni
+                taqdim etamiz.</p>
             <div class="hero-stats">
                 <div class="stat-card">
                     <div class="stat-number">{{ mahsulotlar_soni }}</div>
@@ -37,17 +38,19 @@
             <div class="product-card">
                 <div class="product-badge">{{ mahsulot.get_turi_display }}</div>
                 <div class="product-info">
-                    <h3 class="product-name">{{ mahsulot.nomi }}</h3>
+                    <h3 class="product-name">{{ mahsulot.nomi }}{% if mahsulot.litre != 'none' %} <span
+                            style="font-size: 0.8rem; color: #6b7280;">({{ mahsulot.litre }}L)</span>{% endif %}</h3>
                     {% if mahsulot.tavsif %}
                     <p class="product-description">{{ mahsulot.tavsif|truncatewords:15 }}</p>
                     {% endif %}
                     <div class="product-details">
                         <div class="product-price">{{ mahsulot.narx }} so'm</div>
-                        <div class="product-stock {% if mahsulot.miqdor > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                        <div
+                            class="product-stock {% if mahsulot.miqdor > 0 %}in-stock{% else %}out-of-stock{% endif %}">
                             {% if mahsulot.miqdor > 0 %}
-                                📦 {{ mahsulot.miqdor }} dona
+                            📦 {{ mahsulot.miqdor }} dona
                             {% else %}
-                                ❌ Mavjud emas
+                            ❌ Mavjud emas
                             {% endif %}
                         </div>
                     </div>
