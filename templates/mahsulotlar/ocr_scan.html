@@ -135,8 +135,13 @@
     }
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     .results-section {
@@ -207,7 +212,8 @@
         min-width: 180px;
     }
 
-    .price-input, .qty-input {
+    .price-input,
+    .qty-input {
         width: 80px;
     }
 
@@ -327,7 +333,8 @@
         margin-bottom: 0.25rem;
     }
 
-    .modal-form input, .modal-form select {
+    .modal-form input,
+    .modal-form select {
         width: 100%;
         padding: 0.5rem;
         border: 1px solid var(--border-color);
@@ -345,6 +352,7 @@
         .product-table {
             font-size: 0.85rem;
         }
+
         .segmented-control label {
             padding: 3px 6px;
             font-size: 0.65rem;
@@ -664,7 +672,7 @@
             const data = await response.json();
             if (data.status === 'success') {
                 alert(`${data.created_count} ta mahsulot muvaffaqiyatli saqlandi!`);
-                window.location.href = '/admin/mahsulotlar/mahsulot/';
+                window.location.href = "{% url 'admin_product_list' %}";
             } else {
                 alert('Saqlashda xato: ' + data.error);
             }
@@ -686,14 +694,14 @@
     }
 
     // Close modal on outside click
-    document.getElementById('add-modal').addEventListener('click', function(e) {
+    document.getElementById('add-modal').addEventListener('click', function (e) {
         if (e.target === this) {
             closeAddModal();
         }
     });
 
     // Handle Enter key in modal
-    document.getElementById('modal-price').addEventListener('keypress', function(e) {
+    document.getElementById('modal-price').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             addManualProduct();
         }

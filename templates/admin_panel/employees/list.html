@@ -1,0 +1,46 @@
+{% extends "admin_panel/admin_base.html" %}
+
+{% block title %}Xodimlar | Admin Panel{% endblock %}
+{% block page_title %}Xodimlar{% endblock %}
+
+{% block header_actions %}
+<a href="/admin/hodimlar/hodim/add/" class="badge badge-success" style="text-decoration: none; padding: 12px 20px;">+
+    Yangi xodim</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Ismi</th>
+                    <th>Telefon</th>
+                    <th>Yaratilgan vaqt</th>
+                    <th>Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+                    <td style="font-weight: 600;">{{ employee.username }}</td>
+                    <td>{{ employee.ism }}</td>
+                    <td>{{ employee.telefon|default:"-" }}</td>
+                    <td style="color: var(--text-muted);">{{ employee.yaratilgan_vaqt|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <a href="/admin/hodimlar/hodim/{{ employee.id }}/change/"
+                            style="color: var(--primary); text-decoration: none; font-weight: 600;">Tahrirlash</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">Xodimlar mavjud
+                        emas</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -59,4 +59,5 @@ urlpatterns = [
     path('hodimlar/', include('hodimlar.urls')),
     path('sotuv/', include('sotuv.urls')),
     path('mahsulotlar/', include('mahsulotlar.urls')),
+    path('admin-panel/', include('admin_panel.urls')),
 ]

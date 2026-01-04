@@ -30,9 +30,7 @@
                     <tbody>
                         {% for item in sotuv.items.all %}
                         <tr style="border-bottom: 1px solid #f5f5f5;">
-                            <td style="padding: 0.75rem;">{{ item.mahsulot.nomi }}{% if item.mahsulot.litre != 'none' %}
-                                <span style="font-size: 0.85rem; color: #888;">({{ item.mahsulot.litre }}L)</span>{%
-                                endif %}</td>
+                            <td style="padding: 0.75rem;">{{ item.mahsulot.nomi }}</td>
                             <td style="padding: 0.75rem;">{{ item.miqdor }} dona</td>
                             <td style="padding: 0.75rem;">{{ item.narx|floatformat:0 }} so'm</td>
                             <td style="padding: 0.75rem; text-align: right;">{{ item.jami_summa|floatformat:0 }} so'm
@@ -60,19 +58,6 @@
                 <div class="info-row">
                     <span class="label">Telefon:</span>
                     <span class="value">{{ sotuv.sotuvchi.telefon }}</span>
-                </div>
-            </div>
-
-            <!-- Mijoz ma'lumotlari -->
-            <div class="detail-card">
-                <h3>🛒 Mijoz ma'lumotlari</h3>
-                <div class="info-row">
-                    <span class="label">Mijoz ismi:</span>
-                    <span class="value">{{ sotuv.mijoz_ismi }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Telefon:</span>
-                    <span class="value">{{ sotuv.mijoz_telefon }}</span>
                 </div>
             </div>
 

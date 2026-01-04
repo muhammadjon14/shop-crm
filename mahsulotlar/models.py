@@ -29,11 +29,14 @@ class Mahsulot(models.Model):
         verbose_name='Mahsulot turi',
         related_name='mahsulotlar'
     )
-
-    litre = models.JSONField(
-        default=list,
-        verbose_name='Litrlar',
-        blank=True
+    
+    barcode = models.CharField(
+        max_length=100,
+        verbose_name='Barcode',
+        blank=True,
+        null=True,
+        unique=True,
+        help_text='Mahsulot barcode raqami'
     )
     
     yaratilgan_vaqt = models.DateTimeField(auto_now_add=True, verbose_name='Yaratilgan vaqt')

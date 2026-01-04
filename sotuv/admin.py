@@ -10,18 +10,15 @@ class SotuvItemInline(admin.TabularInline):
 
 @admin.register(Sotuv)
 class SotuvAdmin(admin.ModelAdmin):
-    list_display = ('id', 'sotuvchi', 'mijoz_ismi', 'jami_summa', 'yaratilgan_vaqt')
+    list_display = ('id', 'sotuvchi', 'jami_summa', 'yaratilgan_vaqt')
     list_filter = ('yaratilgan_vaqt', 'sotuvchi')
-    search_fields = ('mijoz_ismi', 'mijoz_telefon', 'sotuvchi__ism')
+    search_fields = ('sotuvchi__ism', 'sotuvchi__familiya')
     readonly_fields = ('jami_summa', 'yaratilgan_vaqt', 'yangilangan_vaqt')
     inlines = [SotuvItemInline]
     
     fieldsets = (
         ('Sotuv ma\'lumotlari', {
             'fields': ('sotuvchi', 'jami_summa')
-        }),
-        ('Mijoz ma\'lumotlari', {
-            'fields': ('mijoz_ismi', 'mijoz_telefon')
         }),
         ('Qo\'shimcha', {
             'fields': ('izoh', 'yaratilgan_vaqt', 'yangilangan_vaqt')
@@ -33,4 +30,4 @@ class SotuvAdmin(admin.ModelAdmin):
 class SotuvItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'sotuv', 'mahsulot', 'miqdor', 'narx', 'jami_summa')
     list_filter = ('sotuv__yaratilgan_vaqt',)
-    search_fields = ('mahsulot__nomi', 'sotuv__mijoz_ismi')
+    search_fields = ('mahsulot__nomi',)

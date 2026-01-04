@@ -34,6 +34,44 @@ def sotuv_detail(request, id):
 
 
 @login_required
+def receipt_view(request, id):
+    """Receipt view with print functionality"""
+    sotuv = get_object_or_404(Sotuv.objects.prefetch_related('items__mahsulot', 'sotuvchi'), id=id)
+    context = {
+        'sotuv': sotuv
+    }
+    return render(request, 'sotuv/receipt.html', context)
+
+
+@login_required
+def search_by_barcode(request):
+    """Search product by barcode"""
+    if request.method == 'GET':
+        barcode = request.GET.get('barcode', '').strip()
+        if not barcode:
+            return JsonResponse({'error': 'Barcode kiritilmagan'}, status=400)
+        
+        try:
+            product = Mahsulot.objects.get(barcode=barcode)
+            return JsonResponse({
+                'status': 'success',
+                'product': {
+                    'id': product.id,
+                    'name': product.nomi,
+                    'price': str(product.narx),
+                    'stock': product.miqdor,
+                    'category': product.turi_id if product.turi else None
+                }
+            })
+        except Mahsulot.DoesNotExist:
+            return JsonResponse({'error': 'Bunday barcode bilan mahsulot topilmadi'}, status=404)
+        except Mahsulot.MultipleObjectsReturned:
+            return JsonResponse({'error': 'Bir nechta mahsulot topildi'}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=405)
+
+
+@login_required
 def pos_view(request):
     products = Mahsulot.objects.all()
     categories = MahsulotTuri.objects.all()
@@ -50,24 +88,15 @@ def create_sale(request):
         try:
             data = json.loads(request.body)
             items = data.get('items', [])
-            mijoz_ismi = data.get('mijoz_ismi', 'Mijoz')
-            mijoz_telefon = data.get('mijoz_telefon', '')
             
             if not items:
                 return JsonResponse({'error': 'Hech qanday mahsulot tanlanmagan'}, status=400)
             
             # Use logged in user as seller
-            # Assuming the logged in user is linked to a Hodim instance or is a Hodim
-            # If request.user is just a User, we might need to find the associated Hodim
-            # For now, let's assume request.user has a related hodim profile or we use the user directly if Sotuv.sotuvchi was changed to User model.
-            # But Sotuv.sotuvchi is ForeignKey to Hodim.
-            # So we need to find the Hodim associated with request.user.
-            
             try:
                 seller = Hodim.objects.get(user=request.user)
             except Hodim.DoesNotExist:
-                # Fallback for superuser or if no hodim profile exists, maybe create a dummy one or error out
-                # For now, let's try to get the first hodim or error
+                # Fallback for superuser or if no hodim profile exists
                 if request.user.is_superuser:
                     seller = Hodim.objects.first()
                     if not seller:
@@ -77,9 +106,7 @@ def create_sale(request):
 
             # Create the sale record
             sotuv = Sotuv.objects.create(
-                sotuvchi=seller,
-                mijoz_ismi=mijoz_ismi,
-                mijoz_telefon=mijoz_telefon
+                sotuvchi=seller
             )
             
             for item in items:
@@ -93,8 +120,7 @@ def create_sale(request):
                     sotuv=sotuv,
                     mahsulot=mahsulot,
                     miqdor=miqdor,
-                    narx=mahsulot.narx,
-                    litre=item.get('litre')
+                    narx=mahsulot.narx
                 )
             
             # Total is automatically updated in SotuvItem.save()

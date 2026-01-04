@@ -18,6 +18,7 @@ def extract_volume(name):
     volume_patterns = [
         (r'(\d+[.,]?\d*)\s*[лl](?:\s|$|[иыa-z])', 'litre'),  # 0.5л, 1l, 1.5 л
         (r'(\d+[.,]?\d*)\s*(?:мл|ml)', 'ml'),  # 250мл, 500ml
+        (r'(\d+[.,]?\d*)\s*(?:гр|gr)', 'gr'),  # 70гр, 100gr
     ]
     
     for pattern, unit_type in volume_patterns:
@@ -28,14 +29,21 @@ def extract_volume(name):
                 num_value = float(value)
                 if unit_type == 'ml':
                     num_value = num_value / 1000  # Convert ml to litres
+                elif unit_type == 'gr':
+                    # For grams, we don't have a direct conversion to litres in this context,
+                    # but we can try to map it if it's common (e.g., 1000g = 1L)
+                    num_value = num_value / 1000
                 
                 # Map to closest available choice
                 litre_choices = [0.29, 0.33, 0.45, 0.5, 0.7, 1.0, 1.5, 2.0, 2.5, 5.0]
                 closest = min(litre_choices, key=lambda x: abs(x - num_value))
-                return str(closest)
+                
+                # Only return if it's reasonably close (e.g., within 10% or 0.1L)
+                if abs(closest - num_value) < 0.1:
+                    return [str(closest)]
             except ValueError:
                 pass
-    return 'none'
+    return []
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -63,7 +71,10 @@ class OCRScanView(View):
             'shop', 'approval', 'code', 'bank', 'terminal', 'merchant', 'auth', 'получатель',
             'инн', 'код', 'агент', 'карзини', 'наличный', 'подпись', 'долг', 'последни', 'расчет',
             'примечан', 'экспедитор', 'поставщик', 'комментари', 'товар отгруж', 'кун бошига',
-            'кун охирига', 'бугунги сумма', 'сумма возврат', 'вид оплаты', 'наименование товар'
+            'кун охирига', 'бугунги сумма', 'сумма возврат', 'вид оплаты', 'наименование товар',
+            'расходная накладная', 'наименование товаров', 'цена за 1шт', 'ед.изм', 'количество', 
+            'сумма', 'кол-во', 'цена', '№', 'отгруж', 'блок', 'цена за 1бл', 'кол-во в 1 блоке',
+            'заказ', 'клиент', 'отпустил', 'принял', 'итог', 'сумма сум'
         ]
         
         for line in lines:
@@ -76,55 +87,94 @@ class OCRScanView(View):
             if any(kw in line_lower for kw in ignore_keywords):
                 continue
             
+            # Skip lines that look like phone numbers
+            if re.search(r'\+?\d{3,}\s*\(?\d{2,}\)?\s*\d{3,}', line):
+                continue
+            
+            # Skip lines that look like headers (e.g., "ЗАКАЗ №", "Клиент:")
+            if re.match(r'^(заказ|клиент|адрес|тел|агент|экспедитор)\b', line_lower):
+                continue
+
             # Skip lines that are mostly numbers (totals, dates, etc.)
             if len(re.sub(r'[\d\s.,]', '', line)) < 3:
                 continue
 
+            # Clean up the line: remove leading numbers like "1 ", "2. ", etc.
+            line = re.sub(r'^\d+[\s.)-]*', '', line)
+
             # Pattern 1: Table format with columns separated by tabs or multiple spaces
             parts = re.split(r'\t+|\s{2,}', line)
-            if len(parts) >= 3:
-                name_candidates = []
+            if len(parts) >= 2:
+                # Try to find a sequence of numbers at the end: [Price] [Qty] [Total] or [Qty] [Price] [Total]
+                nums = []
+                for part in parts:
+                    clean = part.replace(' ', '').replace(',', '.')
+                    if re.match(r'^\d+(\.\d+)?$', clean):
+                        nums.append((float(clean), parts.index(part)))
+                
+                if len(nums) >= 3:
+                    # Check for Price * Qty = Total (or close to it)
+                    for i in range(len(nums) - 2):
+                        n1, idx1 = nums[i]
+                        n2, idx2 = nums[i+1]
+                        n3, idx3 = nums[i+2]
+                        
+                        # Case 1: n1 (price) * n2 (qty) = n3 (total)
+                        # Case 2: n2 (price) * n1 (qty) = n3 (total)
+                        if abs(n1 * n2 - n3) < max(n3 * 0.05, 1.0):
+                            # Found it!
+                            price = n1 if n1 > n2 else n2
+                            qty = n2 if n1 > n2 else n1
+                            
+                            # Name is everything before the first numeric part of the triple
+                            name_idx = min(idx1, idx2)
+                            name = ' '.join(parts[:name_idx]).strip()
+                            # Remove trailing units like "шт", "кг"
+                            name = re.sub(r'\s+(?:шт|кг|блок|бл|ед\.изм)\s*$', '', name, flags=re.IGNORECASE)
+                            
+                            if name:
+                                litre = extract_volume(name)
+                                extracted_products.append({
+                                    'nomi': name,
+                                    'narx': str(price),
+                                    'miqdor': int(qty),
+                                    'litre': litre
+                                })
+                                break
+                    else:
+                        # Fallback if no triple found but we have numbers
+                        pass
+                
+                if any(p['nomi'] in line for p in extracted_products):
+                    continue
+
+                # Fallback to simpler reverse search if triple check failed
                 price = None
                 qty = None
-                
-                for part in parts:
+                for part in reversed(parts):
                     part = part.strip()
-                    if not part:
-                        continue
+                    clean_part = part.replace(' ', '').replace(',', '.')
+                    if re.match(r'^\d+(\.\d+)?$', clean_part):
+                        num = float(clean_part)
+                        if num > 500 and price is None:
+                            price = clean_part
+                        elif num <= 500 and qty is None:
+                            qty = int(num)
                     
-                    # Check if it's a price (number with thousands separator)
-                    price_match = re.match(r'^(\d[\d\s]*[.,]?\d*)$', part.replace(' ', ''))
-                    if price_match:
-                        val = part.replace(' ', '').replace(',', '.')
-                        try:
-                            num = float(val)
-                            if num > 100:  # Likely a price
-                                if price is None:
-                                    price = val
-                            elif num <= 100 and qty is None:  # Likely quantity
-                                qty = int(num)
-                        except ValueError:
-                            pass
-                    else:
-                        # Check if it's a quantity with unit
-                        qty_match = re.match(r'^(\d+)\s*(?:шт|блок|бл)?$', part, re.IGNORECASE)
-                        if qty_match:
-                            qty = int(qty_match.group(1))
-                        else:
-                            name_candidates.append(part)
-                
-                if name_candidates and price:
-                    name = ' '.join(name_candidates)
-                    name = re.sub(r'[:.\\-\\s]+$', '', name)
-                    if len(name) > 1:
-                        litre = extract_volume(name)
-                        extracted_products.append({
-                            'nomi': name,
-                            'narx': price,
-                            'miqdor': qty if qty else 1,
-                            'litre': litre
-                        })
-                        continue
+                    if price and qty:
+                        idx = parts.index(part)
+                        name = ' '.join(parts[:idx]).strip()
+                        if name:
+                            litre = extract_volume(name)
+                            extracted_products.append({
+                                'nomi': name,
+                                'narx': price,
+                                'miqdor': qty,
+                                'litre': litre
+                            })
+                            break
+                if any(p['nomi'] in line for p in extracted_products):
+                    continue
 
             # Pattern 2: Name ... Qty x Price (e.g., "Coca Cola 6 x 12000")
             qty_price_match = re.search(r'(\d+)\s*[xX*]\s*(\d+[.,]?\d*)\s*$', line)
@@ -149,7 +199,6 @@ class OCRScanView(View):
                 price_str = price_match.group(1).replace(',', '.')
                 name_part = line[:price_match.start()].strip()
                 
-                # Check if there's a quantity before the price
                 qty_match = re.search(r'(\d+)\s+$', name_part)
                 if qty_match:
                     qty = qty_match.group(1)
@@ -167,22 +216,6 @@ class OCRScanView(View):
                         'miqdor': qty,
                         'litre': litre
                     })
-            else:
-                # Fallback: if no price at end, maybe it's "Name Price" separated by multiple spaces
-                parts = re.split(r'\s{2,}', line)
-                if len(parts) >= 2:
-                    name = parts[0].strip()
-                    price_part = parts[-1].strip()
-                    price_match = re.search(r'(\d+[.,]?\d*)', price_part)
-                    if price_match:
-                        price_str = price_match.group(0).replace(',', '.')
-                        litre = extract_volume(name)
-                        extracted_products.append({
-                            'nomi': name,
-                            'narx': price_str,
-                            'miqdor': 1,
-                            'litre': litre
-                        })
 
         return JsonResponse({
             'raw_text': result['text'],
@@ -216,7 +249,7 @@ class BulkCreateProductsView(View):
                         nomi=p['nomi'],
                         narx=p['narx'],
                         miqdor=p['miqdor'],
-                        litre=p.get('litre', 'none')
+                        litre=p.get('litre', [])
                     )
                     created_count += 1
             

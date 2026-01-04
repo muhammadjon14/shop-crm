@@ -4,9 +4,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-+vhz!hf3pq7!=tn2k(_ysd!pvkmev-y!j9^-uh54m^addajhdpokjnjiokdssdsokpjfjkdkdsojffnodsjfdb@#%pq'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.103']
 
 INSTALLED_APPS = [
+    'admin_panel',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -80,7 +81,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-OCR_SPACE_API_KEY = 'Put your own key here'   
+OCR_SPACE_API_KEY = 'K88839710788957'   
 
 # Authentication
 LOGIN_URL = '/admin/login/'

@@ -5,6 +5,7 @@
 {{ block.super }}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
+<script src="https://unpkg.com/@zxing/library@latest"></script>
 <style>
     :root {
         --primary: #4f46e5;
@@ -38,12 +39,12 @@
 
     .pos-wrapper {
         display: grid;
-        grid-template-columns: 1fr 380px;
-        gap: 20px;
-        padding: 20px;
-        max-width: 1600px;
+        grid-template-columns: 1fr 420px;
+        gap: 15px;
+        padding: 15px;
+        max-width: 1800px;
         margin: 0 auto;
-        height: calc(100vh - 120px);
+        height: calc(100vh - 100px);
     }
 
     /* Left Side: Products */
@@ -56,27 +57,169 @@
 
     .search-header {
         background: white;
-        padding: 15px;
+        padding: 12px;
         border-radius: var(--radius);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .search-row {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
     }
 
     .search-input {
         flex: 1;
-        padding: 14px 20px;
+        padding: 16px 20px;
         border: 2px solid var(--border);
         border-radius: 10px;
-        font-size: 18px;
-        transition: all 0.15s;
+        font-size: 20px;
+        font-weight: 600;
+        transition: all 0.1s;
         outline: none;
         color: var(--text-main);
+    }
+    
+    .barcode-input {
+        flex: 1;
+        padding: 16px 20px;
+        border: 2px solid var(--primary);
+        border-radius: 10px;
+        font-size: 20px;
+        font-weight: 600;
+        outline: none;
+        color: var(--text-main);
+        background: #f8faff;
+    }
+    
+    .barcode-input::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .barcode-scan-btn {
+        padding: 16px 24px;
+        border-radius: 10px;
+        border: 2px solid var(--primary);
+        background: var(--primary);
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.1s;
+    }
+    
+    .barcode-scan-btn:hover {
+        background: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+    
+    .barcode-scan-btn.scanning {
+        background: var(--danger);
+        border-color: var(--danger);
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* Barcode Scanner Modal */
+    .scanner-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    .scanner-modal.active {
+        display: flex;
+    }
+    
+    .scanner-container {
+        position: relative;
+        width: 90%;
+        max-width: 600px;
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    #scanner-video {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    .scanner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 3px solid var(--primary);
+        border-radius: 12px;
+        pointer-events: none;
+    }
+    
+    .scanner-overlay::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        border: 2px dashed rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+    }
+    
+    .scanner-controls {
+        padding: 20px;
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .scanner-close-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 2px solid var(--danger);
+        background: var(--danger);
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    .scanner-status {
+        flex: 1;
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    
+    .scanner-status.scanning {
+        color: var(--primary);
+    }
+    
+    .scanner-status.success {
+        color: var(--success);
+    }
+    
+    .scanner-status.error {
+        color: var(--danger);
     }
 
     .search-input:focus {
@@ -152,24 +295,24 @@
 
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
         overflow-y: auto;
-        padding-bottom: 20px;
+        padding-bottom: 15px;
     }
 
-    /* Larger touch targets for speed */
+    /* Larger touch targets for speed - optimized for busy hours */
     .product-card {
         background: white;
-        padding: 18px;
-        border-radius: var(--radius);
+        padding: 20px;
+        border-radius: 10px;
         border: 2px solid var(--border);
         cursor: pointer;
-        transition: all 0.1s;
+        transition: all 0.05s;
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        min-height: 100px;
+        gap: 8px;
+        min-height: 120px;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
         position: relative;
@@ -192,26 +335,16 @@
 
     .product-name {
         font-weight: 800;
-        /* Bolder */
         color: var(--text-main);
-        font-size: 1.2rem;
-        /* Larger */
-        line-height: 1.3;
-        margin-bottom: 4px;
-    }
-
-    .product-litre {
-        font-size: 0.95rem;
-        /* Larger */
-        color: var(--text-muted);
-        font-weight: 600;
+        font-size: 1.3rem;
+        line-height: 1.2;
+        margin-bottom: 6px;
     }
 
     .product-price {
         color: var(--primary);
         font-weight: 800;
-        font-size: 1.3rem;
-        /* Larger */
+        font-size: 1.5rem;
         margin-top: auto;
     }
 
@@ -232,58 +365,6 @@
         border-radius: 4px;
         font-size: 0.75rem;
         font-weight: 700;
-    }
-
-    /* Litre Selection Modal/Overlay */
-    .litre-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        border-radius: var(--radius);
-        z-index: 10;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-    }
-
-    .product-card.show-litres .litre-overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .litre-btn {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 80%;
-        font-size: 0.9rem;
-    }
-
-    .litre-btn:hover {
-        background: var(--primary-dark);
-    }
-
-    .close-overlay {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
-        color: var(--text-muted);
     }
 
     /* Right Side: Cart */
@@ -390,18 +471,18 @@
     }
 
     .qty-btn {
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 2px solid var(--border);
         background: white;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         font-weight: bold;
-        font-size: 1.1rem;
-        transition: all 0.1s;
+        font-size: 1.3rem;
+        transition: all 0.05s;
         color: var(--text-main);
     }
 
@@ -449,19 +530,20 @@
 
     .checkout-btn {
         width: 100%;
-        padding: 18px;
+        padding: 22px;
         border-radius: 12px;
         border: none;
         background: var(--primary);
         color: white;
-        font-weight: 700;
-        font-size: 1.15rem;
+        font-weight: 800;
+        font-size: 1.3rem;
         cursor: pointer;
-        transition: all 0.1s;
+        transition: all 0.05s;
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        min-height: 60px;
     }
 
     .checkout-btn:hover:not(:disabled) {
@@ -523,14 +605,19 @@
     <div class="products-container">
         <div class="search-header">
             <div class="search-row">
+                <input type="text" id="barcode-input" class="barcode-input"
+                    placeholder="Barcode yoki mahsulot nomi..." autofocus>
+                <button class="barcode-scan-btn" id="barcode-scan-btn" title="Kameradan barcode skanerlash">
+                    📷 Skaner
+                </button>
                 <input type="text" id="product-search" class="search-input"
-                    placeholder="Mahsulot qidirish... (/ tugmasini bosing)" autofocus>
+                    placeholder="Mahsulot qidirish... (/ tugmasini bosing)">
                 <button class="busy-toggle" id="busy-toggle" title="Tez rejim - animatsiyalarni o'chiradi">
-                    ⚡ Tez rejim
+                    ⚡ Tez
                 </button>
             </div>
             <div class="shortcut-hint">
-                <kbd>/</kbd> Qidirish &nbsp; <kbd>Esc</kbd> Tozalash &nbsp; <kbd>Enter</kbd> Sotish
+                <kbd>/</kbd> Qidirish &nbsp; <kbd>Esc</kbd> Tozalash &nbsp; <kbd>Enter</kbd> Sotish &nbsp; <kbd>F2</kbd> Skaner
             </div>
 
             <div class="category-filter" id="category-filter">
@@ -546,7 +633,7 @@
             <div class="product-card {% if product.miqdor <= 0 %}out-of-stock{% endif %}" data-id="{{ product.id }}"
                 data-name="{{ product.nomi }}" data-price="{{ product.narx|stringformat:'.2f' }}"
                 data-stock="{{ product.miqdor }}" data-category="{{ product.turi_id|default:'' }}"
-                data-litres='{{ product.litre|safe }}'>
+                data-barcode="{{ product.barcode|default:'' }}">
 
                 <div class="product-name">{{ product.nomi }}</div>
                 <div class="product-price">{{ product.narx }} so'm</div>
@@ -554,12 +641,6 @@
                 {% if product.miqdor <= 0 %} <span class="out-of-stock-badge">Tugadi</span>
                     {% elif product.miqdor < 5 %} <span class="low-stock-badge">{{ product.miqdor }} ta qoldi</span>
                         {% endif %}
-
-                        <!-- Litre Selection Overlay -->
-                        <div class="litre-overlay">
-                            <button class="close-overlay">×</button>
-                            <!-- Litres will be injected here via JS -->
-                        </div>
             </div>
             {% endfor %}
         </div>
@@ -599,6 +680,18 @@
     </div>
 </div>
 
+<!-- Barcode Scanner Modal -->
+<div class="scanner-modal" id="scanner-modal">
+    <div class="scanner-container">
+        <video id="scanner-video" autoplay playsinline></video>
+        <div class="scanner-overlay"></div>
+        <div class="scanner-controls">
+            <button class="scanner-close-btn" id="scanner-close-btn">✕ Yopish</button>
+            <div class="scanner-status" id="scanner-status">Kamerani ko'rsating...</div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Pre-load products data
     let cart = [];
@@ -619,11 +712,166 @@
         localStorage.setItem('busyMode', document.body.classList.contains('busy-mode'));
     });
 
+    // Barcode scanning with webcam
+    let codeReader = null;
+    let scanning = false;
+    let stream = null;
+    const barcodeInput = document.getElementById('barcode-input');
+    const barcodeScanBtn = document.getElementById('barcode-scan-btn');
+    const scannerModal = document.getElementById('scanner-modal');
+    const scannerVideo = document.getElementById('scanner-video');
+    const scannerCloseBtn = document.getElementById('scanner-close-btn');
+    const scannerStatus = document.getElementById('scanner-status');
+    
+    // Initialize ZXing code reader
+    if (typeof ZXing !== 'undefined') {
+        codeReader = new ZXing.BrowserMultiFormatReader();
+    }
+    
+    // Manual barcode input (for keyboard scanners or manual entry)
+    let barcodeTimeout = null;
+    barcodeInput.addEventListener('input', function(e) {
+        clearTimeout(barcodeTimeout);
+        barcodeTimeout = setTimeout(async function() {
+            const barcode = barcodeInput.value.trim();
+            if (barcode.length >= 3) {
+                await searchAndAddProduct(barcode);
+                barcodeInput.value = '';
+                barcodeInput.focus();
+            }
+        }, 300);
+    });
+    
+    // Open scanner modal
+    barcodeScanBtn.addEventListener('click', function() {
+        if (!codeReader) {
+            alert('Barcode skaner kutubxonasi yuklanmagan. Iltimos, sahifani yangilang.');
+            return;
+        }
+        openScanner();
+    });
+    
+    // Close scanner
+    scannerCloseBtn.addEventListener('click', function() {
+        closeScanner();
+    });
+    
+    // Close on Escape
+    scannerModal.addEventListener('click', function(e) {
+        if (e.target === scannerModal) {
+            closeScanner();
+        }
+    });
+    
+    async function openScanner() {
+        scannerModal.classList.add('active');
+        barcodeScanBtn.classList.add('scanning');
+        scannerStatus.textContent = 'Kamerani yoqilmoqda...';
+        scannerStatus.className = 'scanner-status';
+        
+        try {
+            const videoInputDevices = await codeReader.listVideoInputDevices();
+            
+            if (videoInputDevices.length === 0) {
+                scannerStatus.textContent = 'Kamera topilmadi!';
+                scannerStatus.className = 'scanner-status error';
+                return;
+            }
+            
+            // Use first available camera (usually the default one)
+            const selectedDeviceId = videoInputDevices[0].deviceId;
+            
+            scannerStatus.textContent = 'Barcode skanerlash...';
+            scannerStatus.className = 'scanner-status scanning';
+            
+            scanning = true;
+            
+            // Start scanning
+            codeReader.decodeFromVideoDevice(selectedDeviceId, 'scanner-video', (result, err) => {
+                if (result) {
+                    // Barcode found!
+                    const barcode = result.getText();
+                    scannerStatus.textContent = `Topildi: ${barcode}`;
+                    scannerStatus.className = 'scanner-status success';
+                    
+                    // Stop scanning
+                    scanning = false;
+                    codeReader.reset();
+                    
+                    // Close scanner and add product
+                    setTimeout(async () => {
+                        closeScanner();
+                        await searchAndAddProduct(barcode);
+                    }, 500);
+                }
+                
+                if (err && err.name !== 'NotFoundException') {
+                    console.error('Scanning error:', err);
+                }
+            });
+            
+        } catch (err) {
+            console.error('Camera error:', err);
+            scannerStatus.textContent = 'Kameraga kirish rad etildi!';
+            scannerStatus.className = 'scanner-status error';
+            scanning = false;
+        }
+    }
+    
+    function closeScanner() {
+        if (codeReader && scanning) {
+            codeReader.reset();
+            scanning = false;
+        }
+        
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        
+        scannerModal.classList.remove('active');
+        barcodeScanBtn.classList.remove('scanning');
+        scannerVideo.srcObject = null;
+        scannerStatus.textContent = 'Kamerani ko\'rsating...';
+        scannerStatus.className = 'scanner-status';
+    }
+    
+    async function searchAndAddProduct(barcode) {
+        try {
+            const response = await fetch(`{% url "search_barcode" %}?barcode=${encodeURIComponent(barcode)}`);
+            const data = await response.json();
+            if (data.status === 'success') {
+                        const product = data.product;
+                        addToCart(
+                            product.id,
+                            product.name,
+                            parseFloat(product.price),
+                            product.stock
+                        );
+                showQuickMessage(`✓ ${product.name} qo'shildi`);
+            } else {
+                // Product not found, try searching by name
+                document.getElementById('product-search').value = barcode;
+                filterProducts();
+                showQuickMessage('Barcode topilmadi, qidiruvda ko\'rsatildi');
+            }
+        } catch (err) {
+            console.error('Barcode search error:', err);
+            showQuickMessage('Xatolik yuz berdi');
+        }
+    }
+    
     // Keyboard shortcuts
     document.addEventListener('keydown', function (e) {
         const isInputFocused = document.activeElement.tagName === 'INPUT' ||
             document.activeElement.tagName === 'SELECT' ||
             document.activeElement.tagName === 'TEXTAREA';
+
+        if (e.key === 'F2') {
+            e.preventDefault();
+            barcodeScanBtn.click();
+            return;
+        }
 
         if (e.key === '/' && !isInputFocused) {
             e.preventDefault();
@@ -632,12 +880,13 @@
         }
 
         if (e.key === 'Escape') {
+            // Close scanner if open
+            if (scannerModal.classList.contains('active')) {
+                closeScanner();
+                return;
+            }
+            
             const searchInput = document.getElementById('product-search');
-            // Close any open overlays
-            document.querySelectorAll('.product-card.show-litres').forEach(card => {
-                card.classList.remove('show-litres');
-            });
-
             if (searchInput.value) {
                 searchInput.value = '';
                 filterProducts();
@@ -660,87 +909,16 @@
 
     // Product click handler
     document.getElementById('products-grid').addEventListener('click', (e) => {
-        // Handle close overlay button
-        if (e.target.classList.contains('close-overlay')) {
-            e.stopPropagation();
-            e.target.closest('.product-card').classList.remove('show-litres');
-            return;
-        }
-
-        // Handle litre selection
-        if (e.target.classList.contains('litre-btn')) {
-            e.stopPropagation();
-            const card = e.target.closest('.product-card');
-            const litre = e.target.dataset.litre;
-            addProductFromCard(card, litre);
-            card.classList.remove('show-litres');
-            return;
-        }
-
         const card = e.target.closest('.product-card');
         if (!card || card.classList.contains('out-of-stock')) return;
 
-        // Check if product has multiple litres
-        let litres = [];
-        try {
-            // Handle single quotes in python list string representation if necessary
-            // But we used |safe filter, so it should be a JS array literal if it was a list
-            // However, python list prints as ['a', 'b'], which is valid JSON if items are double quoted.
-            // If they are single quoted, we need to fix it.
-            let rawLitres = card.dataset.litres;
-            if (rawLitres) {
-                // Replace single quotes with double quotes for JSON parsing if needed
-                rawLitres = rawLitres.replace(/'/g, '"');
-                litres = JSON.parse(rawLitres);
-            }
-        } catch (err) {
-            console.error("Error parsing litres", err);
-            litres = [];
-        }
-
-        if (litres && litres.length > 0) {
-            // If only one litre, just add it
-            if (litres.length === 1) {
-                addProductFromCard(card, litres[0]);
-            } else {
-                // Show overlay
-                showLitreOverlay(card, litres);
-            }
-        } else {
-            // No litres, just add product
-            addProductFromCard(card, null);
-        }
-    });
-
-    function showLitreOverlay(card, litres) {
-        // Close other overlays
-        document.querySelectorAll('.product-card.show-litres').forEach(c => c.classList.remove('show-litres'));
-
-        const overlay = card.querySelector('.litre-overlay');
-        // Clear existing buttons except close button
-        const closeBtn = overlay.querySelector('.close-overlay');
-        overlay.innerHTML = '';
-        overlay.appendChild(closeBtn);
-
-        litres.forEach(litre => {
-            const btn = document.createElement('button');
-            btn.className = 'litre-btn';
-            btn.textContent = litre + 'L';
-            btn.dataset.litre = litre;
-            overlay.appendChild(btn);
-        });
-
-        card.classList.add('show-litres');
-    }
-
-    function addProductFromCard(card, litre) {
         const id = parseInt(card.dataset.id);
         const name = card.dataset.name;
         const price = parseFloat(card.dataset.price);
         const stock = parseInt(card.dataset.stock);
 
-        addToCart(id, name, price, stock, litre);
-    }
+        addToCart(id, name, price, stock);
+    });
 
     // Category Filtering
     document.getElementById('category-filter').addEventListener('click', (e) => {
@@ -765,18 +943,19 @@
 
         cards.forEach(card => {
             const name = card.dataset.name.toLowerCase();
+            const barcode = (card.dataset.barcode || '').toLowerCase();
             const category = card.dataset.category;
 
-            const matchesSearch = !query || name.includes(query);
+            const matchesSearch = !query || name.includes(query) || barcode.includes(query);
             const matchesCategory = currentCategory === 'all' || category === currentCategory;
 
             card.style.display = (matchesSearch && matchesCategory) ? 'flex' : 'none';
         });
     }
 
-    function addToCart(id, name, price, stock, litre) {
-        // Create unique ID for cart item based on product ID AND litre
-        const cartItemId = litre ? `${id}-${litre}` : `${id}`;
+    function addToCart(id, name, price, stock) {
+        // Create unique ID for cart item based on product ID
+        const cartItemId = `${id}`;
         const existingItem = cart.find(item => item.cartItemId === cartItemId);
 
         if (existingItem) {
@@ -803,8 +982,7 @@
                 name,
                 price,
                 quantity: 1,
-                stock,
-                litre
+                stock
             });
         }
         renderCart(cartItemId);
@@ -865,7 +1043,7 @@
             return `
                 <div class="cart-item ${isJustAdded ? 'just-added' : ''}">
                     <div class="item-info">
-                        <div class="item-name">${item.name}${item.litre ? ` (${item.litre}L)` : ''}</div>
+                        <div class="item-name">${item.name}</div>
                         <div class="item-price">${item.price.toLocaleString()} × ${item.quantity} = ${(item.price * item.quantity).toLocaleString()} so'm</div>
                     </div>
                     <div class="item-controls">
@@ -882,8 +1060,43 @@
     }
 
     function showQuickMessage(msg) {
-        alert(msg);
+        // Create a temporary notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 10001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease-out;
+        `;
+        notification.textContent = msg;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
     }
+    
+    // Add notification animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
 
     // Checkout
     document.getElementById('checkout-btn').addEventListener('click', async () => {
@@ -905,13 +1118,8 @@
 
             const data = await response.json();
             if (data.status === 'success') {
-                btn.innerHTML = '<span>✓ Muvaffaqiyatli!</span>';
-                setTimeout(() => {
-                    cart = [];
-                    renderCart();
-                    btn.innerHTML = '<span>Sotuvni yakunlash</span> <kbd>Enter</kbd>';
-                    btn.disabled = true;
-                }, 1000);
+                // Redirect to receipt page
+                window.location.href = `/sotuv/${data.sale_id}/receipt/`;
             } else {
                 alert('Xatolik: ' + data.error);
                 btn.disabled = false;

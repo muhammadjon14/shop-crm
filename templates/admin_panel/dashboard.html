@@ -1,0 +1,94 @@
+{% extends "admin_panel/admin_base.html" %}
+
+{% block title %}Dashboard | Admin Panel{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid"
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 40px;">
+    <div class="card" style="padding: 24px;">
+        <div
+            style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">
+            Bugungi Savdo</div>
+        <div style="font-size: 2rem; font-weight: 800;">{{ bugungi_savdo|default:"0" }} so'm</div>
+    </div>
+    <div class="card" style="padding: 24px;">
+        <div
+            style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">
+            Mahsulotlar</div>
+        <div style="font-size: 2rem; font-weight: 800;">{{ jami_mahsulotlar }}</div>
+    </div>
+    <div class="card" style="padding: 24px;">
+        <div
+            style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">
+            Xodimlar</div>
+        <div style="font-size: 2rem; font-weight: 800;">{{ jami_hodimlar }}</div>
+    </div>
+    <div class="card" style="padding: 24px;">
+        <div
+            style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">
+            Jami Sotuvlar</div>
+        <div style="font-size: 2rem; font-weight: 800;">{{ jami_sotuvlar }}</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Recent Sales -->
+    <div class="card">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-weight: 700;">Oxirgi Sotuvlar</h3>
+            <a href="{% url 'admin_sales_list' %}"
+                style="color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 600;">Hammasini
+                ko'rish</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Vaqt</th>
+                        <th>Summa</th>
+                        <th>Xodim</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in recent_sales %}
+                    <tr>
+                        <td style="font-weight: 600;">#{{ sale.id }}</td>
+                        <td style="color: var(--text-muted);">{{ sale.yaratilgan_vaqt|date:"d.m.Y H:i" }}</td>
+                        <td style="font-weight: 700;">{{ sale.jami_summa }} so'm</td>
+                        <td>{{ sale.sotuvchi.username }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">Sotuvlar
+                            mavjud emas</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Low Stock -->
+    <div class="card">
+        <div style="padding: 20px; border-bottom: 1px solid var(--border);">
+            <h3 style="font-weight: 700;">Kam qolgan tovarlar</h3>
+        </div>
+        <div style="padding: 20px;">
+            {% for product in low_stock_products %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                    <div style="font-weight: 600;">{{ product.nomi }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Narxi: {{ product.narx }} so'm</div>
+                </div>
+                <div class="badge badge-danger">{{ product.miqdor }} dona</div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">Hamma tovarlar yetarli</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

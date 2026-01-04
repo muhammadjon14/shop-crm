@@ -9,9 +9,9 @@ from django.db.models import Sum
 from django.utils import timezone
 
 def home(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard')
-        
+
+
+
     mahsulotlar = Mahsulot.objects.all()[:8]
     hodimlar = Hodim.objects.all()[:6]
     

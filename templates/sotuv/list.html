@@ -31,20 +31,6 @@
                 <span class="stat-label">Jami summa (so'm)</span>
             </div>
         </div>
-        <div class="stat-card success">
-            <div class="stat-icon">✅</div>
-            <div class="stat-info">
-                <span class="stat-value">{{ tasdiqlangan_soni }}</span>
-                <span class="stat-label">Tasdiqlangan</span>
-            </div>
-        </div>
-        <div class="stat-card info">
-            <div class="stat-icon">🚚</div>
-            <div class="stat-info">
-                <span class="stat-value">{{ yetkazilgan_soni }}</span>
-                <span class="stat-label">Yetkazilgan</span>
-            </div>
-        </div>
     </div>
 
     <!-- Jadval -->
@@ -55,10 +41,9 @@
                     <th>#</th>
                     <th>ID</th>
                     <th>Sotuvchi</th>
-                    <th>Mijoz</th>
                     <th>Mahsulotlar</th>
                     <th>Jami Summa</th>
-                    <th>Holati</th>
+                    <th>Chek</th>
                     <th>Sana</th>
                 </tr>
             </thead>
@@ -73,30 +58,21 @@
                     </td>
                     <td>{{ sotuv.sotuvchi.ism }} {{ sotuv.sotuvchi.familiya }}</td>
                     <td>
-                        <div class="customer-info">
-                            <span class="customer-name">{{ sotuv.mijoz_ismi }}</span>
-                            <span class="customer-phone">{{ sotuv.mijoz_telefon }}</span>
-                        </div>
-                    </td>
-                    <td>
                         <div style="font-size: 0.85rem; color: #555;">
                             {% for item in sotuv.items.all %}
-                            {{ item.mahsulot.nomi }}{% if item.mahsulot.litre != 'none' %} ({{ item.mahsulot.litre
-                            }}L){% endif %}{% if not forloop.last %}, {% endif %}
+                            {{ item.mahsulot.nomi }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </div>
                     </td>
                     <td><strong>{{ sotuv.jami_summa|floatformat:0 }} so'm</strong></td>
                     <td>
-                        <span class="status-badge status-{{ sotuv.holati }}">
-                            {{ sotuv.get_holati_display }}
-                        </span>
+                        <a href="{% url 'receipt' sotuv.id %}" style="color: #4f46e5; text-decoration: none; font-weight: 600;">🧾 Chek</a>
                     </td>
                     <td>{{ sotuv.yaratilgan_vaqt|date:"d.m.Y H:i" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="8" class="empty-message">
+                    <td colspan="7" class="empty-message">
                         <div class="empty-state">
                             <span class="empty-icon">📭</span>
                             <p>Hozircha sotuvlar mavjud emas</p>

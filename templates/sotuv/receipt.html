@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chek #{{ sotuv.id }}</title>
+    <style>
+        @media print {
+            body { margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            @page { margin: 0; size: 80mm auto; }
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 80mm;
+            margin: 0 auto;
+            padding: 10px;
+            background: white;
+            color: #000;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .receipt-header h1 {
+            font-size: 18px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        
+        .receipt-info {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .receipt-info div {
+            margin: 3px 0;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        
+        .items-table td {
+            padding: 4px 0;
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .item-name {
+            font-weight: bold;
+        }
+        
+        .item-details {
+            font-size: 11px;
+            color: #666;
+            padding-left: 10px;
+        }
+        
+        .item-total {
+            text-align: right;
+        }
+        
+        .total-section {
+            border-top: 2px solid #000;
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px dashed #000;
+            font-size: 11px;
+        }
+        
+        .no-print {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .no-print button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .no-print button:hover {
+            background: #4338ca;
+        }
+        
+        .no-print a {
+            display: inline-block;
+            background: #6b7280;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .no-print a:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-header">
+        <h1>🧾 CHEK</h1>
+        <div class="receipt-info">
+            <div><strong>Sotuv #{{ sotuv.id }}</strong></div>
+            <div>{{ sotuv.yaratilgan_vaqt|date:"d.m.Y H:i" }}</div>
+            <div>Sotuvchi: {{ sotuv.sotuvchi.ism }} {{ sotuv.sotuvchi.familiya }}</div>
+        </div>
+    </div>
+    
+    <table class="items-table">
+        {% for item in sotuv.items.all %}
+        <tr>
+            <td>
+                <div class="item-name">{{ item.mahsulot.nomi }}</div>
+                <div class="item-details">{{ item.narx|floatformat:0 }} so'm × {{ item.miqdor }}</div>
+            </td>
+            <td class="item-total">{{ item.jami_summa|floatformat:0 }} so'm</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <div class="total-section">
+        <div class="total-row">
+            <span>JAMI:</span>
+            <span>{{ sotuv.jami_summa|floatformat:0 }} so'm</span>
+        </div>
+    </div>
+    
+    <div class="receipt-footer">
+        <div>Rahmat!</div>
+        <div>Qayta keling!</div>
+    </div>
+    
+    <div class="no-print">
+        <button onclick="window.print()">🖨️ Chop etish</button>
+        <a href="{% url 'pos' %}">← Kassa</a>
+        <a href="{% url 'sotuv_list' %}">📋 Sotuvlar</a>
+    </div>
+</body>
+</html>
+
