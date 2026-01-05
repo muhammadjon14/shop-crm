@@ -80,7 +80,7 @@
         outline: none;
         color: var(--text-main);
     }
-    
+
     .barcode-input {
         flex: 1;
         padding: 16px 20px;
@@ -92,11 +92,11 @@
         color: var(--text-main);
         background: #f8faff;
     }
-    
+
     .barcode-input::placeholder {
         color: var(--text-muted);
     }
-    
+
     .barcode-scan-btn {
         padding: 16px 24px;
         border-radius: 10px;
@@ -109,23 +109,30 @@
         white-space: nowrap;
         transition: all 0.1s;
     }
-    
+
     .barcode-scan-btn:hover {
         background: var(--primary-dark);
         border-color: var(--primary-dark);
     }
-    
+
     .barcode-scan-btn.scanning {
         background: var(--danger);
         border-color: var(--danger);
         animation: pulse 1.5s infinite;
     }
-    
+
     @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
     }
-    
+
     /* Barcode Scanner Modal */
     .scanner-modal {
         display: none;
@@ -140,11 +147,11 @@
         align-items: center;
         flex-direction: column;
     }
-    
+
     .scanner-modal.active {
         display: flex;
     }
-    
+
     .scanner-container {
         position: relative;
         width: 90%;
@@ -154,13 +161,13 @@
         overflow: hidden;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
-    
+
     #scanner-video {
         width: 100%;
         height: auto;
         display: block;
     }
-    
+
     .scanner-overlay {
         position: absolute;
         top: 0;
@@ -171,7 +178,7 @@
         border-radius: 12px;
         pointer-events: none;
     }
-    
+
     .scanner-overlay::before {
         content: '';
         position: absolute;
@@ -182,7 +189,7 @@
         border: 2px dashed rgba(255, 255, 255, 0.5);
         border-radius: 8px;
     }
-    
+
     .scanner-controls {
         padding: 20px;
         background: white;
@@ -191,7 +198,7 @@
         align-items: center;
         gap: 15px;
     }
-    
+
     .scanner-close-btn {
         padding: 12px 24px;
         border-radius: 8px;
@@ -202,22 +209,22 @@
         font-size: 16px;
         cursor: pointer;
     }
-    
+
     .scanner-status {
         flex: 1;
         text-align: center;
         font-weight: 600;
         color: var(--text-main);
     }
-    
+
     .scanner-status.scanning {
         color: var(--primary);
     }
-    
+
     .scanner-status.success {
         color: var(--success);
     }
-    
+
     .scanner-status.error {
         color: var(--danger);
     }
@@ -605,8 +612,8 @@
     <div class="products-container">
         <div class="search-header">
             <div class="search-row">
-                <input type="text" id="barcode-input" class="barcode-input"
-                    placeholder="Barcode yoki mahsulot nomi..." autofocus>
+                <input type="text" id="barcode-input" class="barcode-input" placeholder="Barcode yoki mahsulot nomi..."
+                    autofocus>
                 <button class="barcode-scan-btn" id="barcode-scan-btn" title="Kameradan barcode skanerlash">
                     📷 Skaner
                 </button>
@@ -617,7 +624,8 @@
                 </button>
             </div>
             <div class="shortcut-hint">
-                <kbd>/</kbd> Qidirish &nbsp; <kbd>Esc</kbd> Tozalash &nbsp; <kbd>Enter</kbd> Sotish &nbsp; <kbd>F2</kbd> Skaner
+                <kbd>/</kbd> Qidirish &nbsp; <kbd>Esc</kbd> Tozalash &nbsp; <kbd>Enter</kbd> Sotish &nbsp; <kbd>F2</kbd>
+                Skaner
             </div>
 
             <div class="category-filter" id="category-filter">
@@ -652,7 +660,7 @@
             <h2>Savat <span class="cart-count" id="cart-count">0</span></h2>
             <div class="header-actions">
                 {% if user.is_superuser %}
-                <a href="/admin/" class="icon-btn" title="Admin panel">⚙️</a>
+                <a href="{% url 'admin_dashboard' %}" class="icon-btn" title="Admin panel">⚙️</a>
                 {% endif %}
                 <a href="/admin/logout/" class="icon-btn" title="Chiqish">🚪</a>
                 <button class="icon-btn" onclick="clearCart()" title="Tozalash (Esc)">🗑️</button>
@@ -722,17 +730,17 @@
     const scannerVideo = document.getElementById('scanner-video');
     const scannerCloseBtn = document.getElementById('scanner-close-btn');
     const scannerStatus = document.getElementById('scanner-status');
-    
+
     // Initialize ZXing code reader
     if (typeof ZXing !== 'undefined') {
         codeReader = new ZXing.BrowserMultiFormatReader();
     }
-    
+
     // Manual barcode input (for keyboard scanners or manual entry)
     let barcodeTimeout = null;
-    barcodeInput.addEventListener('input', function(e) {
+    barcodeInput.addEventListener('input', function (e) {
         clearTimeout(barcodeTimeout);
-        barcodeTimeout = setTimeout(async function() {
+        barcodeTimeout = setTimeout(async function () {
             const barcode = barcodeInput.value.trim();
             if (barcode.length >= 3) {
                 await searchAndAddProduct(barcode);
@@ -741,51 +749,51 @@
             }
         }, 300);
     });
-    
+
     // Open scanner modal
-    barcodeScanBtn.addEventListener('click', function() {
+    barcodeScanBtn.addEventListener('click', function () {
         if (!codeReader) {
             alert('Barcode skaner kutubxonasi yuklanmagan. Iltimos, sahifani yangilang.');
             return;
         }
         openScanner();
     });
-    
+
     // Close scanner
-    scannerCloseBtn.addEventListener('click', function() {
+    scannerCloseBtn.addEventListener('click', function () {
         closeScanner();
     });
-    
+
     // Close on Escape
-    scannerModal.addEventListener('click', function(e) {
+    scannerModal.addEventListener('click', function (e) {
         if (e.target === scannerModal) {
             closeScanner();
         }
     });
-    
+
     async function openScanner() {
         scannerModal.classList.add('active');
         barcodeScanBtn.classList.add('scanning');
         scannerStatus.textContent = 'Kamerani yoqilmoqda...';
         scannerStatus.className = 'scanner-status';
-        
+
         try {
             const videoInputDevices = await codeReader.listVideoInputDevices();
-            
+
             if (videoInputDevices.length === 0) {
                 scannerStatus.textContent = 'Kamera topilmadi!';
                 scannerStatus.className = 'scanner-status error';
                 return;
             }
-            
+
             // Use first available camera (usually the default one)
             const selectedDeviceId = videoInputDevices[0].deviceId;
-            
+
             scannerStatus.textContent = 'Barcode skanerlash...';
             scannerStatus.className = 'scanner-status scanning';
-            
+
             scanning = true;
-            
+
             // Start scanning
             codeReader.decodeFromVideoDevice(selectedDeviceId, 'scanner-video', (result, err) => {
                 if (result) {
@@ -793,23 +801,23 @@
                     const barcode = result.getText();
                     scannerStatus.textContent = `Topildi: ${barcode}`;
                     scannerStatus.className = 'scanner-status success';
-                    
+
                     // Stop scanning
                     scanning = false;
                     codeReader.reset();
-                    
+
                     // Close scanner and add product
                     setTimeout(async () => {
                         closeScanner();
                         await searchAndAddProduct(barcode);
                     }, 500);
                 }
-                
+
                 if (err && err.name !== 'NotFoundException') {
                     console.error('Scanning error:', err);
                 }
             });
-            
+
         } catch (err) {
             console.error('Camera error:', err);
             scannerStatus.textContent = 'Kameraga kirish rad etildi!';
@@ -817,37 +825,37 @@
             scanning = false;
         }
     }
-    
+
     function closeScanner() {
         if (codeReader && scanning) {
             codeReader.reset();
             scanning = false;
         }
-        
+
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
             stream = null;
         }
-        
+
         scannerModal.classList.remove('active');
         barcodeScanBtn.classList.remove('scanning');
         scannerVideo.srcObject = null;
         scannerStatus.textContent = 'Kamerani ko\'rsating...';
         scannerStatus.className = 'scanner-status';
     }
-    
+
     async function searchAndAddProduct(barcode) {
         try {
             const response = await fetch(`{% url "search_barcode" %}?barcode=${encodeURIComponent(barcode)}`);
             const data = await response.json();
             if (data.status === 'success') {
-                        const product = data.product;
-                        addToCart(
-                            product.id,
-                            product.name,
-                            parseFloat(product.price),
-                            product.stock
-                        );
+                const product = data.product;
+                addToCart(
+                    product.id,
+                    product.name,
+                    parseFloat(product.price),
+                    product.stock
+                );
                 showQuickMessage(`✓ ${product.name} qo'shildi`);
             } else {
                 // Product not found, try searching by name
@@ -860,7 +868,7 @@
             showQuickMessage('Xatolik yuz berdi');
         }
     }
-    
+
     // Keyboard shortcuts
     document.addEventListener('keydown', function (e) {
         const isInputFocused = document.activeElement.tagName === 'INPUT' ||
@@ -885,7 +893,7 @@
                 closeScanner();
                 return;
             }
-            
+
             const searchInput = document.getElementById('product-search');
             if (searchInput.value) {
                 searchInput.value = '';
@@ -1077,13 +1085,13 @@
         `;
         notification.textContent = msg;
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease-out';
             setTimeout(() => notification.remove(), 300);
         }, 2000);
     }
-    
+
     // Add notification animations
     const style = document.createElement('style');
     style.textContent = `

@@ -4,7 +4,8 @@
 {% block page_title %}Xodimlar{% endblock %}
 
 {% block header_actions %}
-<a href="/admin/hodimlar/hodim/add/" class="badge badge-success" style="text-decoration: none; padding: 12px 20px;">+
+<a href="{% url 'admin_employee_add' %}" class="badge badge-success"
+    style="text-decoration: none; padding: 12px 20px;">+
     Yangi xodim</a>
 {% endblock %}
 
@@ -24,12 +25,12 @@
             <tbody>
                 {% for employee in employees %}
                 <tr>
-                    <td style="font-weight: 600;">{{ employee.username }}</td>
-                    <td>{{ employee.ism }}</td>
+                    <td style="font-weight: 600;">{{ employee.user.username|default:"-" }}</td>
+                    <td>{{ employee.ism }} {{ employee.familiya }}</td>
                     <td>{{ employee.telefon|default:"-" }}</td>
                     <td style="color: var(--text-muted);">{{ employee.yaratilgan_vaqt|date:"d.m.Y H:i" }}</td>
                     <td>
-                        <a href="/admin/hodimlar/hodim/{{ employee.id }}/change/"
+                        <a href="{% url 'admin_employee_edit' employee.id %}"
                             style="color: var(--primary); text-decoration: none; font-weight: 600;">Tahrirlash</a>
                     </td>
                 </tr>

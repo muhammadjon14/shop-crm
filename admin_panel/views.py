@@ -5,6 +5,7 @@ from django.utils import timezone
 from mahsulotlar.models import Mahsulot, MahsulotTuri
 from mahsulotlar.forms import MahsulotForm
 from hodimlar.models import Hodim
+from hodimlar.forms import HodimForm
 from sotuv.models import Sotuv, SotuvItem
 from django.contrib import messages
 
@@ -99,6 +100,45 @@ def employee_list(request):
         'active_tab': 'employees'
     }
     return render(request, 'admin_panel/employees/list.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def employee_add(request):
+    if request.method == 'POST':
+        form = HodimForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Xodim muvaffaqiyatli qo'shildi.")
+            return redirect('admin_employee_list')
+    else:
+        form = HodimForm()
+    
+    context = {
+        'form': form,
+        'title': "Yangi xodim qo'shish",
+        'active_tab': 'employees'
+    }
+    return render(request, 'admin_panel/employees/add_edit.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def employee_edit(request, pk):
+    hodim = get_object_or_404(Hodim, pk=pk)
+    if request.method == 'POST':
+        form = HodimForm(request.POST, instance=hodim)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Xodim ma'lumotlari muvaffaqiyatli yangilandi.")
+            return redirect('admin_employee_list')
+    else:
+        form = HodimForm(instance=hodim)
+    
+    context = {
+        'form': form,
+        'title': f"Tahrirlash: {hodim.ism} {hodim.familiya}",
+        'active_tab': 'employees'
+    }
+    return render(request, 'admin_panel/employees/add_edit.html', context)
 
 # Sales Management
 @login_required
