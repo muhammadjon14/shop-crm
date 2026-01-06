@@ -1,10 +1,12 @@
 from pathlib import Path
 
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-+vhz!hf3pq7!=tn2k(_ysd!pvkmev-y!j9^-uh54m^addajhdpokjnjiokdssdsokpjfjkdkdsojffnodsjfdb@#%pq'
 DEBUG = True
-ALLOWED_HOSTS = ['192.168.43.196']
+ALLOWED_HOSTS = ['192.168.43.196', '192.168.137.128', '127.0.0.1']
 
 INSTALLED_APPS = [
     'admin_panel',
@@ -71,7 +73,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'uz'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
